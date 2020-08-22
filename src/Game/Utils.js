@@ -144,14 +144,14 @@ function fullScreen() {
 export function autoResizeCanvas(Game) {
   window.onresize = function () {
     const ratio = Game.ratio;
-    let width = document.body.clientWidth;
-    let height = document.body.clientHeight;
-    if (ratio > width / height) {
-      Game.viewWidth = width;
-      Game.viewHeight = width / ratio;
+    let maxWidth = document.body.clientWidth;
+    let maxHeight = document.body.clientHeight;
+    if (ratio > maxWidth / maxHeight) {
+      Game.viewWidth = maxWidth;
+      Game.viewHeight = maxWidth / ratio;
     } else {
-      Game.viewHeight = height;
-      Game.viewWidth = ratio * height;
+      Game.viewHeight = maxHeight;
+      Game.viewWidth = ratio * maxHeight;
     }
     Game.scale = Game.viewHeight / Game.height;
     // 设置canvas宽高

@@ -16,27 +16,21 @@ Game.init = function (options) {
   this.context = this.canvas.getContext("2d");
 
   // 初始化宽度和高度
-  let bodyWidth = document.body.clientWidth;
-  let bodyHeight = document.body.clientHeight;
-  let defaultRatio = bodyWidth / bodyHeight;
-  if (options.width && options.height) {
-    this.width = this.viewWidth = options.width;
-    this.height = this.viewHeight = options.height;
-    this.ratio = options.width / options.height;
-  } else {
-    this.width = this.viewWidth = bodyWidth;
-    this.height = this.viewHeight = bodyHeight;
-    this.ratio = bodyWidth / bodyHeight;
-  }
-
+  if (!options.width || !options.height) throw Error("Width and height is needed");
+  let maxWidth = document.body.clientWidth;
+  let maxHeight = document.body.clientHeight;
+  let defaultRatio = maxWidth / maxHeight;
+  this.width = this.viewWidth = options.width;
+  this.height = this.viewHeight = options.height;
+  this.ratio = this.width / this.height;
   if (this.ratio > defaultRatio) {
-    this.viewWidth = bodyWidth;
-    this.viewHeight = bodyWidth / this.ratio;
-  } else {
-    this.viewHeight = bodyHeight;
-    this.viewWidth = bodyHeight * this.ratio;
+    this.viewWidth = Math.round(maxWidth);
+    this.viewHeight = Math.round(maxWidth / this.ratio);
+  } else if (this.ratio < defaultRatio) {
+    this.viewHeight = Math.round(maxHeight);
+    this.viewWidth = Math.round(maxHeight * this.ratio);
   }
-
+  
   // 设置canvas宽高
   this.canvas.setAttribute("width", this.viewWidth);
   this.canvas.setAttribute("height", this.viewHeight);

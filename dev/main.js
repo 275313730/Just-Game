@@ -12,7 +12,7 @@ new Stage({
     new Sprite({
       config: {
         id: "test",
-        scale: 7.06
+        scale: 7.055,
       },
       created() {
         this.graphics.image("bg", "sky", true)

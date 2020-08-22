@@ -37,8 +37,8 @@ export default function graphics(sprite) {
       relY: sprite.relY * Game.scale,
       offsetLeft: sprite.offsetLeft * Game.scale,
       offsetTop: sprite.offsetTop * Game.scale,
-      width: sprite.width,
-      height: sprite.height,
+      width: sprite.width * sprite.scale * Game.scale,
+      height: sprite.height * sprite.scale * Game.scale,
       drawWidth: sprite.drawWidth,
       drawHeight: sprite.drawHeight,
       scale: sprite.scale * Game.scale,
@@ -50,18 +50,14 @@ export default function graphics(sprite) {
    * 绘制图片
    * @param {Image} image 图片
    */
-  function drawImage(image, sameSize) {
+  function drawImage(image) {
     let { relX, relY, offsetLeft, offsetTop, width, drawWidth, drawHeight, scale, flip } = getData();
-    if (sameSize) {
-      sprite.width = drawWidth * scale;
-      sprite.height = drawHeight * scale;
-    };
     if (!flip) {
       var tranlateX = floor(relX + offsetLeft);
       var tranlateY = floor(relY + offsetTop);
       ctx.drawImage(image, 0, 0, drawWidth, drawHeight, tranlateX, tranlateY, drawWidth * scale, drawHeight * scale);
     } else {
-      var tranlateX = floor(Game.width - width * scale - relX + offsetLeft);
+      var tranlateX = floor(Game.width - width - relX + offsetLeft);
       var tranlateY = floor(relY + offsetTop);
 
       // 水平翻转绘制
@@ -86,7 +82,7 @@ export default function graphics(sprite) {
       var tranlateY = floor(relY + offsetTop);
       ctx.drawImage(image, currFrame * drawWidth, 0, drawWidth, drawHeight, tranlateX, tranlateY, drawWidth * scale, drawHeight * scale);
     } else {
-      var tranlateX = floor(Game.width - width * scale - relX + offsetLeft);
+      var tranlateX = floor(Game.width - width - relX + offsetLeft);
       var tranlateY = floor(relY + offsetTop);
 
       // 水平翻转绘制
@@ -113,8 +109,10 @@ export default function graphics(sprite) {
    * 测试开启时调用
    */
   function test() {
+    let { relX, relY, width, height } = getData();
+
     ctx.strokeStyle = 'red';
-    ctx.strokeRect(sprite.relX * Game.scale, sprite.relY * Game.scale, sprite.width * Game.scale, sprite.height * Game.scale);
+    ctx.strokeRect(relX, relY, width, height);
   }
 
   return {
@@ -203,10 +201,11 @@ export default function graphics(sprite) {
     image(group, name, sameSize = false) {
       // 获取图片数据
       let image = Game.asset.get(group, name);
-      setSize(image.width, image.height, sameSize)
+      isSameSize = sameSize;
+      setSize(image.width, image.height, sameSize);
       // 绘制函数
       executor = function () {
-        drawImage(image, sameSize);
+        drawImage(image);
       }
     },
     /**
