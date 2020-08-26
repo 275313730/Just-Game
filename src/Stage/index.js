@@ -44,13 +44,6 @@ class Stage {
       this.event = event(this);
       this.geometry = geometry();
 
-      // 混入
-      if (Stage.mixins) {
-        Stage.mixins.forEach(function (mixin) {
-          mixin.call(this);
-        });
-      }
-
       // 创建后函数
       this.created && this.created.call(this);
 

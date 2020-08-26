@@ -13,10 +13,15 @@ export function isMobile() {
   }
 }
 
+export function init(Game) {
+  initStyle();
+  initInputEvent(Game);
+}
+
 /**
  * 初始化页面样式
  */
-export function initStyle() {
+function initStyle() {
   let body = document.body;
   body.style.margin = 0;
   body.style.padding = 0;
@@ -32,8 +37,7 @@ export function initStyle() {
  * 监听用户事件
  * @param {Object} Game 游戏对象
  */
-export function listenInputEvent(Game) {
-
+function initInputEvent(Game) {
   // 触屏事件
   if (Game.isMobile) {
     ["touchstart", "touchmove", "touchend"].forEach(function (eventType) {
@@ -91,13 +95,12 @@ export function listenInputEvent(Game) {
     * @param {Object} e 鼠标数据
     */
   function calMouse(e) {
-    const canvas = Game.canvas;
     // 计算画面缩放比例
-    const scale = Game.scale;
+    const canvas = Game.canvas;
     // 简化事件属性
     return {
-      x: (e.clientX - canvas.offsetLeft) / scale,
-      y: (e.clientY - canvas.offsetTop) / scale,
+      x: e.clientX - canvas.offsetLeft,
+      y: e.clientY - canvas.offsetTop,
       button: e.button
     };
   }
@@ -108,13 +111,12 @@ export function listenInputEvent(Game) {
    */
   function calTouch(e) {
     const canvas = Game.canvas;
-    const scale = Game.scale;
     let touches = [];
     for (let i = 0; i < e.targetTouches.length; i++) {
       const touch = e.targetTouches[i];
       touches.push({
-        x: (touch.clientX - canvas.offsetLeft) / scale,
-        y: (touch.clientY - canvas.offsetTop) / scale,
+        x: touch.clientX - canvas.offsetLeft,
+        y: touch.clientY - canvas.offsetTop,
         id: touch.identifier,
         type: e.type
       });
@@ -135,27 +137,4 @@ function fullScreen() {
   if (typeof rfs != "undefined" && rfs) {
     rfs.call(el);
   };
-}
-
-/**
- * 自适应画布
- * @param {Object} Game 游戏对象
- */
-export function autoResizeCanvas(Game) {
-  window.onresize = function () {
-    const ratio = Game.ratio;
-    let maxWidth = document.body.clientWidth;
-    let maxHeight = document.body.clientHeight;
-    if (ratio > maxWidth / maxHeight) {
-      Game.viewWidth = maxWidth;
-      Game.viewHeight = maxWidth / ratio;
-    } else {
-      Game.viewHeight = maxHeight;
-      Game.viewWidth = ratio * maxHeight;
-    }
-    Game.scale = Game.viewHeight / Game.height;
-    // 设置canvas宽高
-    Game.canvas.setAttribute("width", Game.viewWidth);
-    Game.canvas.setAttribute("height", Game.viewHeight);
-  }
 }

@@ -1,85 +1,14 @@
-import Game from "../../Game/index.js"
-import utils from './utils.js'
+import Game from "../../Game/index.js";
+import { setSize } from './size.js';
+import { drawImage, drawAnimation, test } from './draw.js';
 
 export default function graphics(sprite) {
   const ctx = Game.canvas.getContext('2d');
-  const floor = Math.floor;
 
   /**
    * 绘制执行函数
    */
   let executor = null;
-
-  const { getSpriteData, setSize } = utils(sprite);
-
-  /**
-   * 绘制图片
-   * @param {Image} image 图片
-   */
-  function drawImage(image) {
-    let { relX, relY, offsetLeft, offsetTop, width, drawWidth, drawHeight, scale, flip } = getSpriteData(sprite);
-    if (!flip) {
-      var tranlateX = floor(relX + offsetLeft);
-      var tranlateY = floor(relY + offsetTop);
-      ctx.drawImage(image, 0, 0, drawWidth, drawHeight, tranlateX, tranlateY, drawWidth * scale, drawHeight * scale);
-    } else {
-      var tranlateX = floor(Game.width - width - relX + offsetLeft);
-      var tranlateY = floor(relY + offsetTop);
-
-      // 水平翻转绘制
-      drawFlip(Game.width, function () {
-        ctx.drawImage(image, 0, 0, drawWidth, drawHeight, tranlateX, tranlateY, drawWidth * scale, drawHeight * scale);
-      })
-    }
-  }
-
-  /**
-   * 绘制动画
-   * @param {Image} image 图片
-   * @param {number} currFrame 当前帧
-   * @param {boolean} imageFlip 是否翻转
-   */
-  function drawAnimation(image, currFrame, imageFlip) {
-    var { relX, relY, offsetLeft, offsetTop, width, drawWidth, drawHeight, scale, flip } = getSpriteData(sprite);
-
-    // 图片方向
-    if (!imageFlip && !flip || imageFlip && flip) {
-      var tranlateX = floor(relX + offsetLeft);
-      var tranlateY = floor(relY + offsetTop);
-      ctx.drawImage(image, currFrame * drawWidth, 0, drawWidth, drawHeight, tranlateX, tranlateY, drawWidth * scale, drawHeight * scale);
-    } else {
-      var tranlateX = floor(Game.width - width - relX + offsetLeft);
-      var tranlateY = floor(relY + offsetTop);
-
-      // 水平翻转绘制
-      drawFlip(Game.width, function () {
-        ctx.drawImage(image, currFrame * drawWidth, 0, drawWidth, drawHeight, tranlateX, tranlateY, drawWidth * scale, drawHeight * scale);
-      })
-    }
-  }
-
-  /**
-   * 翻转绘制
-   * @param {number} width 宽度
-   * @param {Function} drawCb 绘制函数
-   */
-  function drawFlip(width, drawCb) {
-    ctx.translate(width, 0);
-    ctx.scale(-1, 1);
-    drawCb();
-    ctx.translate(width, 0);
-    ctx.scale(-1, 1);
-  }
-
-  /**
-   * 测试开启时调用
-   */
-  function test() {
-    let { relX, relY, width, height } = getSpriteData(sprite);
-
-    ctx.strokeStyle = 'red';
-    ctx.strokeRect(relX, relY, width, height);
-  }
 
   return {
     /**
@@ -92,7 +21,7 @@ export default function graphics(sprite) {
       // 获取动画数据
       let anim = Game.asset.get(group, name);
 
-      setSize(anim.image.width / anim.frame, anim.image.height, sameSize);
+      setSize(sprite, anim.image.width / anim.frame, anim.image.height, sameSize);
 
       // 动画属性
       let options = {
@@ -117,7 +46,7 @@ export default function graphics(sprite) {
       // 绘制函数
       executor = function () {
         // 绘制动画
-        drawAnimation(anim.image, currFrame, options.flip);
+        drawAnimation(sprite, anim.image, currFrame, options.flip);
 
         // 动画间隔帧增加
         currInterval++;
@@ -168,10 +97,10 @@ export default function graphics(sprite) {
     image(group, name, sameSize = false) {
       // 获取图片数据
       let image = Game.asset.get(group, name);
-      setSize(image.width, image.height, sameSize);
+      setSize(sprite, image.width, image.height, sameSize);
       // 绘制函数
       executor = function () {
-        drawImage(image);
+        drawImage(sprite, image);
       }
     },
     /**
@@ -247,14 +176,14 @@ export default function graphics(sprite) {
           sprite.scale += nextscale;
         }
 
-        drawImage(image);
+        drawImage(sprite, image);
       }
     },
     /**
      * 渲染
      */
     render() {
-      let { relX, relY, width, height, scale, alpha } = sprite.scale;
+      let { relX, relY, width, height, scale, alpha } = sprite;
       if (alpha <= 0) {
         sprite.alpha = 0;
         return;
@@ -265,7 +194,7 @@ export default function graphics(sprite) {
         relY > Game.height) return;
       ctx.globalAlpha = alpha;
       executor && executor();
-      Game.test && test();
+      Game.test && test(sprite);
     }
   }
 }

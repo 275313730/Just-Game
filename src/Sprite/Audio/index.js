@@ -1,11 +1,9 @@
 import Game from "../../Game/index.js";
-import utils from './utils.js';
+import { setVolume } from './volume.js';
 
 export default function audio(sprite) {
   let music = {};
   let sounds = [];
-
-  const { setVolume } = utils(sprite);
 
   /**
    * 播放音效
@@ -19,7 +17,7 @@ export default function audio(sprite) {
     newSound.play();
 
     sounds.push({
-      audio: newSound,
+      audioNode: newSound,
       defalutVolume: options.volume,
       range: options.range
     });
@@ -31,8 +29,8 @@ export default function audio(sprite) {
    * @param {Object} options 
    */
   function playMusic(newAudio, options) {
-    if (!music.audio || music.audio !== newAudio) {
-      music.audio = newAudio;
+    if (!music.audioNode || music.audioNode !== newAudio) {
+      music.audioNode = newAudio;
       music.defalutVolume = options.volume;
       music.range = options.range;
 
@@ -48,26 +46,26 @@ export default function audio(sprite) {
      */
     update() {
       // 判断是否存在音频
-      if (!music.audio && sounds.length === 0) return;
+      if (!music.audioNode && sounds.length === 0) return;
 
       // 音乐
-      if (music.audio && music.range > 0) {
-        setVolume(music.audio, music.range, music.defalutVolume);
+      if (music.audioNode && music.range > 0) {
+        setVolume(sprite, music);
       }
 
       // 音效
       for (let i = 0; i < sounds.length; i++) {
         const sound = sounds[i];
-        const audio = sound.audio;
+        const audioNode = sound.audioNode;
         // 移除播放完的音效
-        if (audio.ended === true) {
+        if (audioNode.ended === true) {
           sounds.splice(i, 1);
-          audio.remove();
+          audioNode.remove();
           i--;
           continue;
         }
         if (range > 0) {
-          setVolume(sound.audio, sound.range, sound.defalutVolume);
+          setVolume(sprite, sound);
         }
       }
     },
@@ -103,11 +101,11 @@ export default function audio(sprite) {
      * 清除所有音频
      */
     clear() {
-      if (music.audio) {
-        music.audio.remove();
+      if (music.audioNode) {
+        music.audioNode.remove();
       }
       sounds.forEach(function (sound) {
-        sound.audio.remove();
+        sound.audioNode.remove();
       })
     }
   }
